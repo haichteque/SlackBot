@@ -30,7 +30,11 @@ CRITICAL RULES:
 2. If the user refuses to provide details or sends nonsense, politely ask them to describe the actual technical or business problem. 
 3. ONLY output the exact flag [CONTEXT_GATHERED] followed by a 2-sentence summary WHEN you have concrete details about the tools, domain, or specific business hurdle they are facing.`;
 
-const PHASE_2_PROMPT = `Analyze this problem and this list of contacts. Return a strict JSON object containing the 2 best matches. Use this exact schema: { "matches": [ { "name": "string", "reason_for_match": "string", "suggested_message": "string" } ] }. Do not include markdown formatting like \`\`\`json.`;
+const PHASE_2_PROMPT = `Analyze this problem and this list of contacts. Return a strict JSON object containing the best matches (up to 2). 
+
+CRITICAL RULE: You must ONLY match the user with people who genuinely have the required skills. If no one in the directory is a logical fit for the problem, do NOT invent a person and do NOT force a bad match. Instead, return an empty array.
+
+Use this exact schema: { "matches": [ { "name": "string", "reason_for_match": "string", "suggested_message": "string" } ] }. Do not include markdown formatting.`;
 
 // Cleanup abandoned sessions every 15 minutes
 setInterval(() => {
@@ -86,14 +90,14 @@ async function handleUserMessage(event, say) {
     if (mistralMessage.includes('[CONTEXT_GATHERED]')) {
       // Extract summary
       const summary = mistralMessage.split('[CONTEXT_GATHERED]')[1].trim();
-      
+
       // We don't save the Phase 2 response to Phase 1 history to keep it clean, 
       // but we can acknowledge the user
       await say("Got it! I've understood your problem. Let me find the best experts for you...");
-      
+
       // Trigger Phase 2
       await executePhase2(summary, say);
-      
+
       // Reset the session after a successful match
       userSessions.delete(userId);
     } else {
@@ -128,7 +132,7 @@ async function executePhase2(problemSummary, say) {
     });
 
     let jsonString = response.choices[0].message.content.trim();
-    
+
     // In case there's still markdown despite instructions
     if (jsonString.startsWith('```json')) {
       jsonString = jsonString.replace(/^```json/, '').replace(/```$/, '').trim();
@@ -137,7 +141,31 @@ async function executePhase2(problemSummary, say) {
     }
 
     const matchData = JSON.parse(jsonString);
-    
+
+    // NEW: The Escape Hatch Logic
+    if (!matchData.matches || matchData.matches.length === 0) {
+      const noMatchBlocks = [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: "⚠️ No Exact Match Found",
+            emoji: true
+          }
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `I reviewed the directory for your issue:\n_${problemSummary}_\n\nUnfortunately, we don't currently have an expert listed with that specific skillset. I recommend posting your question in the *#engineering-help* channel or reaching out to your engineering manager.`
+          }
+        }
+      ];
+
+      await say({ blocks: noMatchBlocks, text: "No exact match found." });
+      return; // Stop execution here
+    }
+
     // Format response using Block Kit
     const blocks = buildBlockKitResponse(problemSummary, matchData.matches);
     await say({ blocks, text: "Here are your suggested matches!" });
