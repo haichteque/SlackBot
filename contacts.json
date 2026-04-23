@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Alice Chen",
+    "current_role": "Senior Backend Engineer",
+    "past_projects": ["Microservices Migration", "Payment Gateway Integration", "High-throughput Logging Service"],
+    "core_skills": ["Node.js", "Go", "Kubernetes", "PostgreSQL", "Kafka"],
+    "communication_style": "Direct, prefers async communication via Slack. Detail-oriented."
+  },
+  {
+    "name": "Bob Smith",
+    "current_role": "Lead Frontend Developer",
+    "past_projects": ["Design System Overhaul", "Mobile App React Native Port", "Dashboard Analytics UI"],
+    "core_skills": ["React", "TypeScript", "CSS Architecture", "Framer Motion", "Web Performance"],
+    "communication_style": "Visual thinker, prefers quick huddles or pair programming sessions."
+  },
+  {
+    "name": "Carol Davis",
+    "current_role": "Data Scientist",
+    "past_projects": ["Customer Churn Prediction Model", "Recommendation Engine", "A/B Testing Framework"],
+    "core_skills": ["Python", "TensorFlow", "SQL", "Spark", "Statistical Modeling"],
+    "communication_style": "Analytical, likes to have data provided upfront before diving into discussions."
+  },
+  {
+    "name": "David Lee",
+    "current_role": "DevOps Architect",
+    "past_projects": ["CI/CD Pipeline Revamp", "Multi-region AWS Deployment", "Cost Optimization Initiative"],
+    "core_skills": ["AWS", "Terraform", "Docker", "CI/CD (GitHub Actions, Jenkins)", "Observability (Datadog)"],
+    "communication_style": "Very structured, prefers documented requests and clear acceptance criteria."
+  },
+  {
+    "name": "Eva Martinez",
+    "current_role": "Product Manager",
+    "past_projects": ["User Onboarding Flow Redesign", "Enterprise Tier Launch", "API Platform Productization"],
+    "core_skills": ["Agile Methodologies", "User Research", "Roadmap Planning", "Stakeholder Management", "Data Analytics"],
+    "communication_style": "Empathetic, focuses on user impact. Prefers synchronous meetings for complex topics."
+  },
+  {
+    "name": "Frank Wilson",
+    "current_role": "Security Engineer",
+    "past_projects": ["SOC2 Compliance Audit", "Identity & Access Management Rollout", "Bug Bounty Program Setup"],
+    "core_skills": ["Penetration Testing", "Cryptography", "OAuth/OIDC", "Cloud Security", "Vulnerability Management"],
+    "communication_style": "Cautious and precise. Prefers written communication for audit trails."
+  }
+]

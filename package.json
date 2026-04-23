@@ -1,0 +1,14 @@
+{
+  "name": "slack-bot-copilot",
+  "version": "1.0.0",
+  "description": "A Slack bot co-pilot using Mistral AI for matchmaking.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "@mistralai/mistralai": "^0.1.3",
+    "@slack/bolt": "^3.17.1",
+    "dotenv": "^16.4.5"
+  }
+}
