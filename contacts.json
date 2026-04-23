@@ -2,43 +2,150 @@
   {
     "name": "Alice Chen",
     "current_role": "Senior Backend Engineer",
-    "past_projects": ["Microservices Migration", "Payment Gateway Integration", "High-throughput Logging Service"],
-    "core_skills": ["Node.js", "Go", "Kubernetes", "PostgreSQL", "Kafka"],
-    "communication_style": "Direct, prefers async communication via Slack. Detail-oriented."
+    "past_projects": [
+      "Microservices Migration",
+      "Payment Gateway Integration"
+    ],
+    "core_skills": [
+      "Node.js",
+      "Go",
+      "Kubernetes",
+      "API Design"
+    ],
+    "communication_style": "Direct, prefers async communication via Slack."
   },
   {
     "name": "Bob Smith",
-    "current_role": "Lead Frontend Developer",
-    "past_projects": ["Design System Overhaul", "Mobile App React Native Port", "Dashboard Analytics UI"],
-    "core_skills": ["React", "TypeScript", "CSS Architecture", "Framer Motion", "Web Performance"],
-    "communication_style": "Visual thinker, prefers quick huddles or pair programming sessions."
+    "current_role": "Lead Web Developer",
+    "past_projects": [
+      "Design System Overhaul",
+      "Marketing Site Performance"
+    ],
+    "core_skills": [
+      "React",
+      "TypeScript",
+      "CSS Architecture",
+      "Web Performance"
+    ],
+    "communication_style": "Visual thinker, prefers quick huddles."
   },
   {
     "name": "Carol Davis",
     "current_role": "Data Scientist",
-    "past_projects": ["Customer Churn Prediction Model", "Recommendation Engine", "A/B Testing Framework"],
-    "core_skills": ["Python", "TensorFlow", "SQL", "Spark", "Statistical Modeling"],
-    "communication_style": "Analytical, likes to have data provided upfront before diving into discussions."
+    "past_projects": [
+      "Customer Churn Prediction",
+      "Recommendation Engine"
+    ],
+    "core_skills": [
+      "Python",
+      "TensorFlow",
+      "Statistical Modeling",
+      "Pandas"
+    ],
+    "communication_style": "Analytical, likes data provided upfront."
   },
   {
     "name": "David Lee",
-    "current_role": "DevOps Architect",
-    "past_projects": ["CI/CD Pipeline Revamp", "Multi-region AWS Deployment", "Cost Optimization Initiative"],
-    "core_skills": ["AWS", "Terraform", "Docker", "CI/CD (GitHub Actions, Jenkins)", "Observability (Datadog)"],
-    "communication_style": "Very structured, prefers documented requests and clear acceptance criteria."
+    "current_role": "Cloud Infrastructure Architect",
+    "past_projects": [
+      "AWS Multi-region Deployment",
+      "Cost Optimization"
+    ],
+    "core_skills": [
+      "AWS",
+      "Terraform",
+      "Docker",
+      "EC2",
+      "VPC"
+    ],
+    "communication_style": "Very structured, prefers documented requests."
   },
   {
     "name": "Eva Martinez",
     "current_role": "Product Manager",
-    "past_projects": ["User Onboarding Flow Redesign", "Enterprise Tier Launch", "API Platform Productization"],
-    "core_skills": ["Agile Methodologies", "User Research", "Roadmap Planning", "Stakeholder Management", "Data Analytics"],
-    "communication_style": "Empathetic, focuses on user impact. Prefers synchronous meetings for complex topics."
+    "past_projects": [
+      "User Onboarding Flow",
+      "Enterprise Tier Launch"
+    ],
+    "core_skills": [
+      "Agile Methodologies",
+      "User Research",
+      "Roadmap Planning"
+    ],
+    "communication_style": "Empathetic, focuses on user impact."
   },
   {
     "name": "Frank Wilson",
     "current_role": "Security Engineer",
-    "past_projects": ["SOC2 Compliance Audit", "Identity & Access Management Rollout", "Bug Bounty Program Setup"],
-    "core_skills": ["Penetration Testing", "Cryptography", "OAuth/OIDC", "Cloud Security", "Vulnerability Management"],
-    "communication_style": "Cautious and precise. Prefers written communication for audit trails."
+    "past_projects": [
+      "SOC2 Compliance Audit",
+      "IAM Rollout"
+    ],
+    "core_skills": [
+      "Penetration Testing",
+      "Cryptography",
+      "Cloud Security"
+    ],
+    "communication_style": "Cautious and precise. Prefers written audit trails."
+  },
+  {
+    "name": "Grace Taylor",
+    "current_role": "Database Reliability Engineer",
+    "past_projects": [
+      "Postgres Query Optimization",
+      "Database Sharding"
+    ],
+    "core_skills": [
+      "PostgreSQL",
+      "SQL Tuning",
+      "Database Architecture",
+      "Redis"
+    ],
+    "communication_style": "To the point, highly technical. Needs schema details first."
+  },
+  {
+    "name": "Henry Ford",
+    "current_role": "Serverless Platform Engineer",
+    "past_projects": [
+      "Event-driven Architecture",
+      "Azure Function Migration"
+    ],
+    "core_skills": [
+      "Azure",
+      "Serverless Framework",
+      "Node.js",
+      "EventGrid"
+    ],
+    "communication_style": "Pragmatic, prefers discussing architecture via whiteboard."
+  },
+  {
+    "name": "Iris West",
+    "current_role": "Mobile Applications Lead",
+    "past_projects": [
+      "Flagship iOS App Rewrite",
+      "Offline-first Syncing"
+    ],
+    "core_skills": [
+      "Swift",
+      "React Native",
+      "Mobile CI/CD",
+      "SQLite"
+    ],
+    "communication_style": "Fast-paced, prefers voice notes or quick calls."
+  },
+  {
+    "name": "Jack Reacher",
+    "current_role": "Data Systems Engineer",
+    "past_projects": [
+      "Real-time Telemetry Pipeline",
+      "Kafka Cluster Scaling"
+    ],
+    "core_skills": [
+      "Kafka",
+      "Apache Spark",
+      "Data Streaming",
+      "Go"
+    ],
+    "communication_style": "Quiet, prefers well-defined Jira tickets."
   }
 ]

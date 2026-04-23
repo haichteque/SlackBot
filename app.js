@@ -16,29 +16,64 @@ const app = new App({
 // Load contacts
 const contactsData = fs.readFileSync('./contacts.json', 'utf-8');
 
+// Add this near your userSessions Map
+const activeProcessingLocks = new Set();
+
 // In-memory store for conversation history
-// Key: user ID, Value: Array of message objects { role: 'user' | 'assistant', content: string }
+// Key: user ID, Value: { history: Array of message objects, lastAccessed: number }
 const userSessions = new Map();
 
-const PHASE_1_PROMPT = `You are an internal company matching agent. The user needs help. Ask 1 or 2 clarifying questions to understand their specific technical or business problem. Once you fully understand the core issue, you must output EXACTLY the flag [CONTEXT_GATHERED] followed immediately by a 2-sentence summary of their problem.`;
+const PHASE_1_PROMPT = `You are a strict internal company matching agent. A user will come to you with a problem. Ask 1 or 2 clarifying questions to understand their specific technical or business problem. 
+
+CRITICAL RULES:
+1. Do NOT output [CONTEXT_GATHERED] if the user is just testing the bot (e.g., saying "test", "hello"), being vague, or rushing you without providing details.
+2. If the user refuses to provide details or sends nonsense, politely ask them to describe the actual technical or business problem. 
+3. ONLY output the exact flag [CONTEXT_GATHERED] followed by a 2-sentence summary WHEN you have concrete details about the tools, domain, or specific business hurdle they are facing.`;
 
 const PHASE_2_PROMPT = `Analyze this problem and this list of contacts. Return a strict JSON object containing the 2 best matches. Use this exact schema: { "matches": [ { "name": "string", "reason_for_match": "string", "suggested_message": "string" } ] }. Do not include markdown formatting like \`\`\`json.`;
+
+// Cleanup abandoned sessions every 15 minutes
+setInterval(() => {
+  const now = Date.now();
+  const SESSION_TIMEOUT = 60 * 60 * 1000; // 1 hour timeout
+  for (const [userId, session] of userSessions.entries()) {
+    if (now - session.lastAccessed > SESSION_TIMEOUT) {
+      userSessions.delete(userId);
+    }
+  }
+}, 15 * 60 * 1000);
 
 async function handleUserMessage(event, say) {
   const userId = event.user;
   const userMessage = event.text;
 
-  // Initialize session if it doesn't exist
-  if (!userSessions.has(userId)) {
-    userSessions.set(userId, [
-      { role: 'system', content: PHASE_1_PROMPT }
-    ]);
+  // 1. ATOMIC LOCK CHECK: Evaluate this immediately
+  if (activeProcessingLocks.has(userId)) {
+    // Only send the warning if they try to bypass the lock
+    await say("⏳ Please wait, I'm still processing your previous message...");
+    return; // Kill this execution instantly
   }
 
-  const history = userSessions.get(userId);
-  history.push({ role: 'user', content: userMessage });
+  // 2. ENGAGE THE LOCK
+  activeProcessingLocks.add(userId);
 
   try {
+    // Initialize session if it doesn't exist
+    if (!userSessions.has(userId)) {
+      userSessions.set(userId, {
+        history: [
+          { role: 'system', content: PHASE_1_PROMPT }
+        ],
+        lastAccessed: Date.now()
+      });
+    }
+
+    const session = userSessions.get(userId);
+    session.lastAccessed = Date.now();
+    const history = session.history;
+
+    history.push({ role: 'user', content: userMessage });
+
     // Phase 1: Call Mistral
     const response = await mistral.chat.complete({
       model: 'mistral-large-latest',
@@ -69,6 +104,11 @@ async function handleUserMessage(event, say) {
   } catch (error) {
     console.error("Error communicating with Mistral:", error);
     await say("Sorry, I encountered an error while trying to process your request.");
+  } finally {
+    // 3. RELEASE THE LOCK
+    // This runs no matter what—even if Mistral crashes or returns an error.
+    // This prevents the user from being locked out forever.
+    activeProcessingLocks.delete(userId);
   }
 }
 
