@@ -18,6 +18,7 @@ const contactsData = fs.readFileSync('./contacts.json', 'utf-8');
 
 // Add this near your userSessions Map
 const activeProcessingLocks = new Set();
+const processedMessages = new Set(); // NEW: Tracks unique Slack messages
 
 // In-memory store for conversation history
 // Key: user ID, Value: { history: Array of message objects, lastAccessed: number }
@@ -30,11 +31,22 @@ CRITICAL RULES:
 2. If the user refuses to provide details or sends nonsense, politely ask them to describe the actual technical or business problem. 
 3. ONLY output the exact flag [CONTEXT_GATHERED] followed by a 2-sentence summary WHEN you have concrete details about the tools, domain, or specific business hurdle they are facing.`;
 
-const PHASE_2_PROMPT = `Analyze this problem and this list of contacts. Return a strict JSON object containing the best matches (up to 2). 
+const PHASE_2_PROMPT = `Analyze this problem and this list of contacts. 
 
-CRITICAL RULE: You must ONLY match the user with people who genuinely have the required skills. If no one in the directory is a logical fit for the problem, do NOT invent a person and do NOT force a bad match. Instead, return an empty array.
+CRITICAL RULES:
+1. You must ONLY match the user with people who genuinely have the required skills.
+2. ADJACENT SKILLS: You are allowed to match related technologies (e.g., if the user needs help with Next.js, a React expert is a valid match. If they need Ubuntu help, a general Linux/DevOps expert is valid).
+3. ESCAPE HATCH: If no one in the directory is a logical fit, or if the domain is entirely missing from the directory (e.g., hardware engineering, legal advice), you must return an empty array for "matches". Do not invent people.
 
-Use this exact schema: { "matches": [ { "name": "string", "reason_for_match": "string", "suggested_message": "string" } ] }. Do not include markdown formatting.`;
+Return a strict JSON object using this EXACT schema:
+{
+  "internal_analysis": "Write 2 sentences explaining your logic. Which skills are required? Who has them, or why does no one have them?",
+  "matches": [ 
+    { "name": "string", "reason_for_match": "string", "suggested_message": "string" } 
+  ]
+}
+Do not include markdown formatting like \`\`\`json.`;
+
 
 // Cleanup abandoned sessions every 15 minutes
 setInterval(() => {
@@ -50,8 +62,20 @@ setInterval(() => {
 async function handleUserMessage(event, say) {
   const userId = event.user;
   const userMessage = event.text;
+  const msgId = event.client_msg_id; // Slack's unique fingerprint for this text
 
-  // 1. ATOMIC LOCK CHECK: Evaluate this immediately
+  // 1. DEDUPLICATION CATCH: Have we seen this exact message event before?
+  if (msgId && processedMessages.has(msgId)) {
+    console.log(`[DEBUG] Ignored duplicate Slack retry for msg: ${msgId}`);
+    return; // Kill execution silently
+  }
+  
+  // Save the ID so we never process it again
+  if (msgId) {
+    processedMessages.add(msgId);
+  }
+
+  // 2. ATOMIC LOCK CHECK: Evaluate this immediately
   if (activeProcessingLocks.has(userId)) {
     // Only send the warning if they try to bypass the lock
     await say("⏳ Please wait, I'm still processing your previous message...");
