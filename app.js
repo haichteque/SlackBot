@@ -59,6 +59,31 @@ setInterval(() => {
   }
 }, 15 * 60 * 1000);
 
+/**
+ * Executes a promise-returning function with exponential backoff retry logic.
+ */
+async function withRetry(operation, maxRetries = 3, baseDelayMs = 1000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Try to execute the API call
+      return await operation(); 
+    } catch (error) {
+      // If this was our last attempt, throw the error so the catch block below can handle it
+      if (attempt === maxRetries) {
+        console.error(`❌ Operation failed permanently after ${maxRetries} attempts.`);
+        throw error; 
+      }
+      
+      // Calculate the delay: 1000ms, then 2000ms, then 4000ms...
+      const delay = baseDelayMs * Math.pow(2, attempt - 1);
+      console.warn(`⚠️ API Call failed (Attempt ${attempt}/${maxRetries}). Retrying in ${delay}ms...`);
+      
+      // Pause execution for the calculated delay
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
 async function handleUserMessage(event, say) {
   const userId = event.user;
   const userMessage = event.text;
@@ -103,10 +128,10 @@ async function handleUserMessage(event, say) {
     history.push({ role: 'user', content: userMessage });
 
     // Phase 1: Call Mistral
-    const response = await mistral.chat.complete({
+    const response = await withRetry(() => mistral.chat.complete({
       model: 'mistral-large-latest',
       messages: history,
-    });
+    }));
 
     const mistralMessage = response.choices[0].message.content;
 
@@ -147,13 +172,13 @@ async function executePhase2(problemSummary, say) {
       { role: 'user', content: `Problem Summary:\n${problemSummary}\n\nContacts List:\n${contactsData}` }
     ];
 
-    const response = await mistral.chat.complete({
+    const response = await withRetry(() => mistral.chat.complete({
       model: 'mistral-large-latest',
       messages: phase2Messages,
       // We can use JSON response format to enforce strict JSON if the model supports it,
       // but the prompt already instructs it.
       responseFormat: { type: 'json_object' }
-    });
+    }));
 
     let jsonString = response.choices[0].message.content.trim();
 
