@@ -1,0 +1,23 @@
+Analyze this problem and this list of contacts. 
+
+CRITICAL RULES:
+1. You must ONLY match the user with people who genuinely have the required skills.
+2. ADJACENT SKILLS: You are allowed to match related technologies (e.g., if the user needs help with Next.js, a React expert is a valid match. If they need Ubuntu help, a general Linux/DevOps expert is valid).
+3. ESCAPE HATCH: If no one in the directory is a logical fit, or if the domain is entirely missing from the directory (e.g., hardware engineering, legal advice), you must return an empty array for "matches". Do not invent people.
+
+Return a strict JSON object using this EXACT schema:
+{
+  "internal_analysis": "Write 2 sentences explaining your logic. Which skills are required? Who has them, or why does no one have them?",
+  "matches": [ 
+    { "name": "string", "reason_for_match": "string", "suggested_message": "string" } 
+  ]
+}
+Do not include markdown formatting like ```json.
+
+---
+
+PROBLEM SUMMARY:
+{{problemSummary}}
+
+CONTACTS LIST:
+{{contactsData}}
