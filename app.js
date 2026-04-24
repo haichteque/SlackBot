@@ -84,6 +84,53 @@ async function withRetry(operation, maxRetries = 3, baseDelayMs = 1000) {
   }
 }
 
+/**
+ * Executes a Mistral chat completion with an automatic model cascade fallback.
+ */
+async function mistralWithFallback(messages, isPhase2 = false) {
+  // Define our cascade: Tier 1 -> Tier 2 -> Tier 3
+  const modelCascade = [
+    'mistral-large-latest', 
+    'mistral-medium-latest', 
+    'mistral-small-latest'
+  ];
+
+  for (let i = 0; i < modelCascade.length; i++) {
+    const targetModel = modelCascade[i];
+    
+    try {
+      console.log(`[DEBUG] Attempting API call with: ${targetModel}`);
+      
+      const requestPayload = {
+        model: targetModel,
+        messages: messages,
+      };
+
+      // Only enforce strict JSON mode if this is the Phase 2 matchmaker
+      if (isPhase2) {
+        requestPayload.responseFormat = { type: 'json_object' };
+      }
+
+      // Try the API call with exponential backoff!
+      const response = await withRetry(() => mistral.chat.complete(requestPayload));
+      
+      return response; // If successful, return the data and exit the loop!
+
+    } catch (error) {
+      console.warn(`⚠️ Model ${targetModel} failed. Error: ${error.message}`);
+      
+      // If we are on the very last model in the array and it fails, throw the fatal error
+      if (i === modelCascade.length - 1) {
+        console.error(`❌ All models in the cascade failed.`);
+        throw error; 
+      }
+      
+      // Optional: Add a tiny 500ms breather before hitting the next model
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+}
+
 async function handleUserMessage(event, say) {
   const userId = event.user;
   const userMessage = event.text;
@@ -128,10 +175,7 @@ async function handleUserMessage(event, say) {
     history.push({ role: 'user', content: userMessage });
 
     // Phase 1: Call Mistral
-    const response = await withRetry(() => mistral.chat.complete({
-      model: 'mistral-large-latest',
-      messages: history,
-    }));
+    const response = await mistralWithFallback(history, false);
 
     const mistralMessage = response.choices[0].message.content;
 
@@ -172,13 +216,7 @@ async function executePhase2(problemSummary, say) {
       { role: 'user', content: `Problem Summary:\n${problemSummary}\n\nContacts List:\n${contactsData}` }
     ];
 
-    const response = await withRetry(() => mistral.chat.complete({
-      model: 'mistral-large-latest',
-      messages: phase2Messages,
-      // We can use JSON response format to enforce strict JSON if the model supports it,
-      // but the prompt already instructs it.
-      responseFormat: { type: 'json_object' }
-    }));
+    const response = await mistralWithFallback(phase2Messages, true);
 
     let jsonString = response.choices[0].message.content.trim();
 
