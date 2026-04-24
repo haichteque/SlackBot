@@ -42,3 +42,13 @@ While this heuristic pipeline works perfectly for a prototype, scaling it for an
 1. **Clone the repository and install dependencies:**
    ```bash
    npm install
+
+2. **Run the bot:**
+   ```bash
+   node app.js
+   ```
+
+   **Run unit tests:**
+   ```bash
+   promptfoo eval
+   ```
